@@ -1,0 +1,1063 @@
+html
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R-TV | Закрытый Видеохостинг Администрации</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#ff2a2a',
+                            darkRed: '#991b1b',
+                            yellow: '#facc15',
+                            bg: '#0a0a0c',
+                            card: '#121216',
+                            border: '#27272a',
+                            panel: '#18181b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff2a2a;
+        }
+        
+        .blur-locked {
+            filter: blur(16px) brightness(0.4) saturate(0.5);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .glow-red {
+            box-shadow: 0 0 20px rgba(255, 42, 42, 0.25);
+        }
+        .glow-red-hover:hover {
+            box-shadow: 0 0 25px rgba(255, 42, 42, 0.4);
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            accent-color: #ff2a2a;
+        }
+
+        .bg-grid-pattern {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-gray-100 min-h-screen font-sans flex flex-col antialiased bg-grid-pattern selection:bg-brand-red selection:text-white">
+
+    <!-- APP HEADER -->
+    <header class="sticky top-0 z-30 bg-brand-bg/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3 flex items-center justify-between transition-all">
+        <div class="flex items-center gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="app.resetView()">
+                <div class="relative flex items-center justify-center">
+                    <!-- Custom SVG representation of RTV Logo -->
+                    <svg class="w-10 h-10 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 100 C 20 40, 60 20, 100 20 L 90 80 L 120 80 L 50 180 L 75 110 L 20 100 Z" fill="#FACC15"/>
+                        <rect x="90" y="75" width="90" height="50" rx="6" fill="#FFFFFF"/>
+                        <text x="100" y="112" font-family="Arial, sans-serif" font-weight="900" font-size="36" fill="#FACC15">TV</text>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl font-black tracking-wider text-white">R-TV</span>
+                        <span class="text-[10px] bg-brand-red/20 text-brand-red border border-brand-red/30 px-1.5 py-0.5 rounded font-mono uppercase tracking-widest font-bold">ADMIN ONLY</span>
+                    </div>
+                    <p class="text-xs text-gray-400 hidden sm:block">Закрытый хостинг доказательств & откатов</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Actions / User Info -->
+        <div class="flex items-center gap-3">
+            <div id="headerUserArea" class="hidden flex items-center gap-3">
+                <!-- Server Badge -->
+                <div class="hidden md:flex flex-col items-end">
+                    <span id="headerServerBadge" class="text-xs font-semibold text-brand-yellow bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-0.5 rounded-full">
+                        Server #01
+                    </span>
+                    <span id="headerRoleBadge" class="text-[10px] text-gray-400 font-medium">Модератор</span>
+                </div>
+
+                <!-- Upload Button -->
+                <button onclick="app.openUploadModal()" class="flex items-center gap-2 bg-brand-red hover:bg-red-600 text-white px-3.5 py-2 rounded-lg font-medium text-sm transition shadow-lg glow-red-hover active:scale-95">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Загрузить откат</span>
+                </button>
+
+                <!-- Profile Dropdown Trigger -->
+                <div class="flex items-center gap-2 bg-brand-panel border border-brand-border p-1.5 pl-3 rounded-lg cursor-pointer hover:border-gray-600 transition" onclick="app.toggleUserMenu()">
+                    <span id="headerNick" class="text-sm font-bold max-w-[120px] truncate">Admin_User</span>
+                    <img id="headerAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-8 h-8 rounded-md object-cover border border-brand-red" alt="Avatar">
+                </div>
+            </div>
+
+            <button id="headerLoginBtn" onclick="app.openAuthModal()" class="bg-brand-red hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg glow-red">
+                Авторизация
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="mainWrapper" class="flex-1 flex flex-col md:flex-row max-w-[1600px] w-full mx-auto px-2 sm:px-4 lg:px-6 py-4 gap-6 blur-locked transition-all duration-500">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-4">
+            <!-- Navigation Card -->
+            <div class="bg-brand-card border border-brand-border rounded-xl p-3 flex flex-col gap-1 shadow-xl">
+                <div class="text-xs font-semibold text-gray-400 px-3 py-2 uppercase tracking-wider">Навигация</div>
+                
+                <button onclick="app.setFilter('all')" id="nav-all" class="nav-btn flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium bg-brand-red text-white transition">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="film" class="w-4 h-4"></i>
+                        <span>Все откаты сервера</span>
+                    </div>
+                    <span id="count-all" class="text-xs bg-black/40 px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
+
+                <button onclick="app.setFilter('my')" id="nav-my" class="nav-btn flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-brand-panel hover:text-white transition">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span>Мои записи</span>
+                    </div>
+                    <span id="count-my" class="text-xs bg-brand-panel px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
+
+                <button onclick="app.setFilter('photo')" id="nav-photo" class="nav-btn flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-brand-panel hover:text-white transition">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="image" class="w-4 h-4"></i>
+                        <span>Скриншоты / Фото</span>
+                    </div>
+                    <span id="count-photo" class="text-xs bg-brand-panel px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
+            </div>
+
+            <!-- Auto-Deletion Info Box -->
+            <div class="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl flex flex-col gap-3">
+                <div class="flex items-center gap-2 text-brand-red font-semibold text-sm">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <span>Авто-очистка 72 часа</span>
+                </div>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                    Все доказательства автоматически удаляются через 72 часа с момента загрузки в соответствии с регламентом администрации.
+                </p>
+                <button onclick="app.triggerAutoCleanup()" class="w-full text-xs bg-brand-panel hover:bg-brand-border text-gray-300 hover:text-white py-2 px-3 rounded-lg border border-brand-border transition flex items-center justify-center gap-2">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5 text-brand-red"></i>
+                    <span>Симулировать очистку</span>
+                </button>
+            </div>
+
+            <!-- Server Rules / Reminder Card -->
+            <div class="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl text-xs text-gray-400 space-y-2">
+                <div class="flex items-center gap-2 font-bold text-gray-200">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-brand-yellow"></i>
+                    <span>Памятка администратора</span>
+                </div>
+                <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-400">
+                    <li>Не передавайте ссылки сторонним лицам.</li>
+                    <li>Обязательно укажите таймкоды нарушений в комментариях.</li>
+                    <li>Формат названия: [Фракция/Ник] Причина.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- MAIN FEED CONTENT -->
+        <main class="flex-1 flex flex-col gap-6">
+            
+            <!-- Controls Bar (Search, Server Switcher, View toggle) -->
+            <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                <!-- Search -->
+                <div class="relative w-full sm:w-72">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" id="searchInput" oninput="app.renderFeed()" placeholder="Поиск по нику или названию..." class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-red transition">
+                </div>
+
+                <!-- Info Badges & Server Selector -->
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-1.5 text-xs text-gray-400 bg-brand-panel px-3 py-2 rounded-lg border border-brand-border">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                        <span>Сервер:</span>
+                        <strong id="activeServerDisplay" class="text-white font-mono">Server 01</strong>
+                    </div>
+
+                    <!-- View Switcher -->
+                    <div class="flex items-center bg-brand-bg p-1 rounded-lg border border-brand-border">
+                        <button onclick="app.setViewMode('grid')" id="viewGridBtn" class="p-1.5 rounded text-brand-red bg-brand-panel transition">
+                            <i data-lucide="grid" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="app.setViewMode('list')" id="viewListBtn" class="p-1.5 rounded text-gray-500 hover:text-white transition">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed Grid / List Container -->
+            <div id="feedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Dynamic Content Rendered Here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-brand-card border border-brand-border rounded-xl p-8">
+                <div class="w-16 h-16 rounded-full bg-brand-panel flex items-center justify-center text-gray-500 mb-4 border border-brand-border">
+                    <i data-lucide="video-off" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-200 mb-1">Откаты не найдены</h3>
+                <p class="text-sm text-gray-400 max-w-md mb-6">В данном разделе нет загруженных видеозаписей или ваш уровень доступа ограничен только просмотром собственных откатов.</p>
+                <button onclick="app.openUploadModal()" class="bg-brand-red hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg glow-red">
+                    Загрузить первый откат
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- AUTHENTICATION / REGISTRATION MODAL -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="bg-brand-card border border-brand-red/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl glow-red relative overflow-hidden">
+            <!-- Decorative Accent -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-red/10 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-panel border border-brand-border mb-3">
+                    <svg class="w-10 h-10" viewBox="0 0 200 200" fill="none">
+                        <path d="M20 100 C 20 40, 60 20, 100 20 L 90 80 L 120 80 L 50 180 L 75 110 L 20 100 Z" fill="#FACC15"/>
+                        <rect x="90" y="75" width="90" height="50" rx="6" fill="#FFFFFF"/>
+                        <text x="100" y="112" font-family="Arial, sans-serif" font-weight="900" font-size="36" fill="#FACC15">TV</text>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-black tracking-wide text-white">Вход в R-TV</h2>
+                <p class="text-xs text-gray-400 mt-1">Закрытая база доказательств администрации</p>
+            </div>
+
+            <form id="authForm" onsubmit="app.handleAuth(event)" class="space-y-4">
+                <!-- Nickname Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Игровой Никнейм (Nick_Name)</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input type="text" id="regNick" required placeholder="Alex_Ford" class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition">
+                    </div>
+                </div>
+
+                <!-- Server Selection (30 Servers) -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Выбор сервера (1 - 30)</label>
+                    <div class="relative">
+                        <i data-lucide="server" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <select id="regServer" required class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition appearance-none">
+                            <!-- Populated JS -->
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Role Selection -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Должность / Роль</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="regRole" value="admin" checked class="peer sr-only">
+                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-3 text-center transition">
+                                <div class="text-sm font-bold text-white">Администратор</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Только свои видео</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="regRole" value="moderator" class="peer sr-only">
+                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-3 text-center transition">
+                                <div class="text-sm font-bold text-white">Модератор</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Все видео сервера</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Avatar Selection -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Аватар профиля</label>
+                    <div class="flex items-center gap-3">
+                        <img id="regAvatarPreview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-10 h-10 rounded-lg object-cover border border-brand-border" alt="Preview">
+                        <input type="text" id="regAvatarUrl" oninput="app.updateAvatarPreview(this.value)" placeholder="URL аватарки (необязательно)" class="flex-1 bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-red hover:bg-red-600 text-white font-bold py-3 rounded-lg transition shadow-lg glow-red mt-2">
+                    Войти в систему R-TV
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- UPLOAD & TRIMMER MODAL -->
+    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="bg-brand-card border border-brand-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="app.closeUploadModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="text-brand-red w-5 h-5"></i>
+                <span>Загрузка видеозаписи / Отката</span>
+            </h3>
+            <p class="text-xs text-gray-400 mb-6">Поддерживаются форматы MP4, WebM, JPG, PNG. Максимальный срок хранения — 72 часа.</p>
+
+            <form id="uploadForm" onsubmit="app.handleUploadSubmit(event)" class="space-y-4">
+                <!-- Dropzone / File Picker -->
+                <div id="dropzone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-brand-border hover:border-brand-red rounded-xl p-6 text-center cursor-pointer transition bg-brand-bg/50">
+                    <input type="file" id="fileInput" accept="video/*,image/*" class="hidden" onchange="app.handleFileSelect(event)">
+                    <i data-lucide="file-video" class="w-10 h-10 text-brand-red mx-auto mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-200" id="uploadFileText">Нажмите или перетащите файл сюда</p>
+                    <p class="text-xs text-gray-500 mt-1">Видео до 100 МБ или Изображение</p>
+                </div>
+
+                <!-- Trim Preview Section (If Video) -->
+                <div id="trimmerSection" class="hidden space-y-3 bg-brand-panel p-4 rounded-xl border border-brand-border">
+                    <div class="flex items-center justify-between text-xs font-semibold text-gray-300">
+                        <span class="flex items-center gap-1.5"><i data-lucide="scissors" class="w-3.5 h-3.5 text-brand-red"></i> Обрезка видео</span>
+                        <span id="trimDuration" class="font-mono text-brand-yellow">00:00 - 00:00</span>
+                    </div>
+
+                    <!-- Video Element Preview -->
+                    <div class="relative bg-black rounded-lg overflow-hidden max-h-56 flex justify-center">
+                        <video id="trimmerVideo" class="w-full h-auto max-h-56 object-contain" controls></video>
+                    </div>
+
+                    <!-- Range Trimmers -->
+                    <div class="space-y-2 pt-2">
+                        <div>
+                            <div class="flex justify-between text-[11px] text-gray-400 mb-1">
+                                <span>Начало:</span>
+                                <span id="startTimeLabel" class="font-mono text-white">0 сек</span>
+                            </div>
+                            <input type="range" id="startTrim" min="0" max="100" value="0" oninput="app.updateTrimmer()" class="w-full h-1.5 bg-brand-bg rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] text-gray-400 mb-1">
+                                <span>Конец:</span>
+                                <span id="endTimeLabel" class="font-mono text-white">0 сек</span>
+                            </div>
+                            <input type="range" id="endTrim" min="0" max="100" value="100" oninput="app.updateTrimmer()" class="w-full h-1.5 bg-brand-bg rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">Название записи / Нарушение</label>
+                    <input type="text" id="uploadTitle" required placeholder="[LSPD] Игрок #12412 - DM in GreenZone" class="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">Описание / Таймкоды (опционально)</label>
+                    <textarea id="uploadDesc" rows="2" placeholder="0:15 - Начало погони&#10;1:20 - Зафиксирован уход от RP" class="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-red transition resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="app.closeUploadModal()" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Отмена</button>
+                    <button type="submit" class="bg-brand-red hover:bg-red-600 text-white font-bold px-6 py-2 rounded-lg transition shadow-lg glow-red">Опубликовать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PLAYER & COMMENTS MODAL -->
+    <div id="playerModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md hidden">
+        <div class="bg-brand-card border border-brand-border rounded-2xl max-w-4xl w-full flex flex-col lg:flex-row overflow-hidden shadow-2xl max-h-[95vh]">
+            <!-- Video/Photo Display Container -->
+            <div class="lg:w-2/3 bg-black flex flex-col justify-center items-center relative min-h-[300px]">
+                <button onclick="app.closePlayerModal()" class="lg:hidden absolute top-3 right-3 z-10 text-white bg-black/60 p-1.5 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div id="mediaContainer" class="w-full h-full flex items-center justify-center">
+                    <!-- Dynamic Media (Video or Image) -->
+                </div>
+            </div>
+
+            <!-- Side Sidebar: Details, Timer, Comments -->
+            <div class="lg:w-1/3 flex flex-col p-4 bg-brand-card border-t lg:border-t-0 lg:border-l border-brand-border max-h-[500px] lg:max-h-none overflow-y-auto">
+                <div class="flex items-center justify-between pb-3 border-b border-brand-border">
+                    <div class="flex items-center gap-2">
+                        <img id="playerAuthorAvatar" src="" class="w-8 h-8 rounded-md object-cover border border-brand-red" alt="Author">
+                        <div>
+                            <div id="playerAuthorNick" class="text-sm font-bold text-white leading-tight">Nick_Name</div>
+                            <div id="playerAuthorRole" class="text-[10px] text-gray-400">Администратор</div>
+                        </div>
+                    </div>
+                    <button onclick="app.closePlayerModal()" class="hidden lg:block text-gray-400 hover:text-white">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Video Meta -->
+                <div class="py-3 border-b border-brand-border space-y-2">
+                    <h3 id="playerTitle" class="font-bold text-gray-100 text-base leading-snug">Title Here</h3>
+                    <p id="playerDesc" class="text-xs text-gray-400 whitespace-pre-line leading-relaxed">Description...</p>
+                    
+                    <div class="flex items-center justify-between pt-1">
+                        <span id="playerServerBadge" class="text-[11px] font-mono text-brand-yellow bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">Server 01</span>
+                        <!-- Live Timer Tag -->
+                        <span id="playerTimer" class="text-[11px] font-mono text-brand-red bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 flex items-center gap-1">
+                            <i data-lucide="clock" class="w-3 h-3"></i> 71ч 59м
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Social Actions -->
+                <div class="flex items-center justify-between py-3 border-b border-brand-border">
+                    <button id="likeBtn" onclick="app.toggleLike()" class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-panel hover:bg-brand-border text-gray-300 transition">
+                        <i data-lucide="heart" class="w-4 h-4 text-brand-red"></i>
+                        <span id="likeCount">0</span>
+                    </button>
+
+                    <button onclick="app.shareCurrentVideo()" class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-panel hover:bg-brand-border text-gray-300 transition">
+                        <i data-lucide="share-2" class="w-4 h-4 text-brand-yellow"></i>
+                        <span>Поделиться</span>
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="flex-1 flex flex-col pt-3 min-h-[180px]">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Комментарии</span>
+                    
+                    <div id="commentsList" class="flex-1 space-y-3 overflow-y-auto max-h-[220px] pr-1 mb-3">
+                        <!-- Dynamic Comments -->
+                    </div>
+
+                    <!-- New Comment Input -->
+                    <form onsubmit="app.addComment(event)" class="mt-auto flex gap-2">
+                        <input type="text" id="commentInput" required placeholder="Написать комментарий..." class="flex-1 bg-brand-bg border border-brand-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-red transition">
+                        <button type="submit" class="bg-brand-red hover:bg-red-600 text-white p-2 rounded-lg transition">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-brand-card border border-brand-red text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i data-lucide="info" class="w-5 h-5 text-brand-red"></i>
+        <span id="toastMessage" class="text-sm font-medium">Уведомление</span>
+    </div>
+
+    <!-- MAIN APP JAVASCRIPT LOGIC -->
+    <script>
+        // Mock DB Initial Data
+        const INITIAL_MOCK_VIDEOS = [
+            {
+                id: 'vid-101',
+                title: '[Ghetto] Mass DM at Bank / ID #8841',
+                description: '0:05 - Игрок подбегает без отыгровки\n0:12 - Открытие огня по гражданским',
+                type: 'video',
+                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                authorNick: 'Alexander_Gromov',
+                authorRole: 'admin',
+                server: 'Server 01',
+                createdAt: Date.now() - (10 * 3600 * 1000), // 10 hours ago
+                likes: 5,
+                likedBy: [],
+                comments: [
+                    { nick: 'Dmitry_M', role: 'moderator', text: 'Наказание выдано верно. 180 минут деморгана.', time: '8 ч. назад' }
+                ]
+            },
+            {
+                id: 'vid-102',
+                title: '[LSPD] Уход от RP в воду #1290',
+                description: 'Погоня продолжалась 5 минут, после чего подозреваемый спрыгнул с пирса.',
+                type: 'video',
+                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+                authorNick: 'Kate_Nights',
+                authorRole: 'moderator',
+                server: 'Server 01',
+                createdAt: Date.now() - (48 * 3600 * 1000), // 48 hours ago
+                likes: 12,
+                likedBy: [],
+                comments: []
+            },
+            {
+                id: 'photo-103',
+                title: 'Скриншот чита / FlyCar ID 4412',
+                description: 'Доказательство использования читов (полет на авто).',
+                type: 'photo',
+                url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
+                authorNick: 'Alexander_Gromov',
+                authorRole: 'admin',
+                server: 'Server 01',
+                createdAt: Date.now() - (65 * 3600 * 1000), // 65 hours ago
+                likes: 3,
+                likedBy: [],
+                comments: []
+            },
+            {
+                id: 'vid-104',
+                title: '[Server 02] NonRP Drive & SK',
+                description: 'Фиксация с сервера #02',
+                type: 'video',
+                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+                authorNick: 'Sergey_V',
+                authorRole: 'admin',
+                server: 'Server 02',
+                createdAt: Date.now() - (5 * 3600 * 1000),
+                likes: 1,
+                likedBy: [],
+                comments: []
+            }
+        ];
+
+        class RTVApp {
+            constructor() {
+                this.user = JSON.parse(localStorage.getItem('rtv_user')) || null;
+                this.videos = JSON.parse(localStorage.getItem('rtv_videos')) || INITIAL_MOCK_VIDEOS;
+                this.currentFilter = 'all'; // 'all', 'my', 'photo'
+                this.viewMode = 'grid'; // 'grid' or 'list'
+                this.activeVideoId = null;
+                this.tempFile = null;
+
+                this.init();
+            }
+
+            init() {
+                this.populateServerDropdown();
+                this.checkAuthStatus();
+                this.startTimerInterval();
+                lucide.createIcons();
+            }
+
+            populateServerDropdown() {
+                const select = document.getElementById('regServer');
+                select.innerHTML = '';
+                for (let i = 1; i <= 30; i++) {
+                    const num = i < 10 ? `0${i}` : `${i}`;
+                    const opt = document.createElement('option');
+                    opt.value = `Server ${num}`;
+                    opt.textContent = `Server #${num} | R-TV Main`;
+                    select.appendChild(opt);
+                }
+            }
+
+            checkAuthStatus() {
+                const mainWrapper = document.getElementById('mainWrapper');
+                const authModal = document.getElementById('authModal');
+                const headerUserArea = document.getElementById('headerUserArea');
+                const headerLoginBtn = document.getElementById('headerLoginBtn');
+
+                if (this.user) {
+                    mainWrapper.classList.remove('blur-locked');
+                    authModal.classList.add('hidden');
+                    headerUserArea.classList.remove('hidden');
+                    headerLoginBtn.classList.add('hidden');
+
+                    document.getElementById('headerNick').textContent = this.user.nick;
+                    document.getElementById('headerAvatar').src = this.user.avatar;
+                    document.getElementById('headerServerBadge').textContent = this.user.server;
+                    document.getElementById('headerRoleBadge').textContent = this.user.role === 'admin' ? 'Администратор' : 'Модератор';
+                    document.getElementById('activeServerDisplay').textContent = this.user.server;
+
+                    this.renderFeed();
+                } else {
+                    mainWrapper.classList.add('blur-locked');
+                    authModal.classList.remove('hidden');
+                    headerUserArea.classList.add('hidden');
+                    headerLoginBtn.classList.remove('hidden');
+                }
+            }
+
+            openAuthModal() {
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+
+            handleAuth(e) {
+                e.preventDefault();
+                const nick = document.getElementById('regNick').value.trim();
+                const server = document.getElementById('regServer').value;
+                const role = document.querySelector('input[name="regRole"]:checked').value;
+                const avatar = document.getElementById('regAvatarUrl').value.trim() || 
+                    `https://api.dicebear.com/7.x/identicon/svg?seed=${nick}`;
+
+                this.user = { nick, server, role, avatar };
+                localStorage.setItem('rtv_user', JSON.stringify(this.user));
+
+                this.showToast(`Добро пожаловать, ${nick}!`);
+                this.checkAuthStatus();
+            }
+
+            updateAvatarPreview(url) {
+                const img = document.getElementById('regAvatarPreview');
+                img.src = url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
+            }
+
+            // Filtering & Access Controls Logic
+            getFilteredVideos() {
+                if (!this.user) return [];
+
+                let list = this.videos;
+
+                // 72 Hours filter
+                const now = Date.now();
+                const SEVENTY_TWO_HOURS = 72 * 3600 * 1000;
+                list = list.filter(v => (now - v.createdAt) < SEVENTY_TWO_HOURS);
+
+                // Role Logic:
+                // Administrator -> Sees ONLY their own clips
+                // Moderator -> Sees all clips on their selected server
+                if (this.user.role === 'admin') {
+                    list = list.filter(v => v.authorNick === this.user.nick);
+                } else if (this.user.role === 'moderator') {
+                    list = list.filter(v => v.server === this.user.server);
+                }
+
+                // Tab Filter
+                if (this.currentFilter === 'my') {
+                    list = list.filter(v => v.authorNick === this.user.nick);
+                } else if (this.currentFilter === 'photo') {
+                    list = list.filter(v => v.type === 'photo');
+                }
+
+                // Search Filter
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                if (search) {
+                    list = list.filter(v => v.title.toLowerCase().includes(search) || v.authorNick.toLowerCase().includes(search));
+                }
+
+                return list;
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('bg-brand-red', 'text-white');
+                    btn.classList.add('text-gray-300', 'hover:bg-brand-panel');
+                });
+                
+                const activeBtn = document.getElementById(`nav-${filter}`);
+                if (activeBtn) {
+                    activeBtn.classList.add('bg-brand-red', 'text-white');
+                    activeBtn.classList.remove('text-gray-300', 'hover:bg-brand-panel');
+                }
+
+                this.renderFeed();
+            }
+
+            setViewMode(mode) {
+                this.viewMode = mode;
+                document.getElementById('viewGridBtn').className = mode === 'grid' ? 'p-1.5 rounded text-brand-red bg-brand-panel' : 'p-1.5 rounded text-gray-500 hover:text-white';
+                document.getElementById('viewListBtn').className = mode === 'list' ? 'p-1.5 rounded text-brand-red bg-brand-panel' : 'p-1.5 rounded text-gray-500 hover:text-white';
+                this.renderFeed();
+            }
+
+            renderFeed() {
+                const container = document.getElementById('feedContainer');
+                const emptyState = document.getElementById('emptyState');
+                const videos = this.getFilteredVideos();
+
+                // Update counts in sidebar
+                const allVisible = this.videos.filter(v => {
+                    if (this.user.role === 'admin') return v.authorNick === this.user.nick;
+                    return v.server === this.user.server;
+                });
+                document.getElementById('count-all').textContent = allVisible.length;
+                document.getElementById('count-my').textContent = allVisible.filter(v => v.authorNick === this.user.nick).length;
+                document.getElementById('count-photo').textContent = allVisible.filter(v => v.type === 'photo').length;
+
+                if (videos.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+
+                container.className = this.viewMode === 'grid' 
+                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5' 
+                    : 'flex flex-col gap-4';
+
+                container.innerHTML = videos.map(vid => this.createCardHTML(vid)).join('');
+                lucide.createIcons();
+            }
+
+            createCardHTML(vid) {
+                const timeLeftStr = this.calculateTimeLeft(vid.createdAt);
+                const isPhoto = vid.type === 'photo';
+
+                if (this.viewMode === 'list') {
+                    return `
+                        <div onclick="app.openPlayerModal('${vid.id}')" class="bg-brand-card border border-brand-border hover:border-brand-red/50 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer transition glow-red-hover group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-16 h-12 bg-black rounded-lg overflow-hidden flex-shrink-0 relative flex items-center justify-center border border-brand-border">
+                                    ${isPhoto ? `<img src="${vid.url}" class="w-full h-full object-cover">` : `<i data-lucide="play" class="w-5 h-5 text-brand-red"></i>`}
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white group-hover:text-brand-red transition line-clamp-1">${vid.title}</h4>
+                                    <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                                        <span>${vid.authorNick}</span> • 
+                                        <span class="text-brand-yellow font-mono">${vid.server}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="text-brand-red font-mono bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">
+                                    <i data-lucide="clock" class="w-3 h-3 inline"></i> ${timeLeftStr}
+                                </span>
+                                <div class="flex items-center gap-1 text-gray-400">
+                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-brand-red"></i> ${vid.likes}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div onclick="app.openPlayerModal('${vid.id}')" class="bg-brand-card border border-brand-border hover:border-brand-red/50 rounded-xl overflow-hidden flex flex-col cursor-pointer transition glow-red-hover group">
+                        <!-- Thumbnail Preview -->
+                        <div class="relative aspect-video bg-black flex items-center justify-center border-b border-brand-border overflow-hidden">
+                            ${isPhoto 
+                                ? `<img src="${vid.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
+                                : `<video src="${vid.url}#t=1" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition"></video>
+                                   <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                       <div class="w-12 h-12 rounded-full bg-brand-red/90 text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition">
+                                           <i data-lucide="play" class="w-6 h-6 fill-white ml-0.5"></i>
+                                       </div>
+                                   </div>`
+                            }
+
+                            <!-- Badges -->
+                            <div class="absolute top-2 left-2 flex gap-1">
+                                <span class="bg-black/70 backdrop-blur-md text-brand-yellow font-mono text-[10px] px-2 py-0.5 rounded border border-brand-yellow/30 font-bold">
+                                    ${vid.server}
+                                </span>
+                            </div>
+                            <div class="absolute top-2 right-2">
+                                <span class="bg-black/70 backdrop-blur-md text-brand-red font-mono text-[10px] px-2 py-0.5 rounded border border-brand-red/30 flex items-center gap-1 font-semibold">
+                                    <i data-lucide="clock" class="w-3 h-3"></i> ${timeLeftStr}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-brand-red transition line-clamp-2 leading-snug">${vid.title}</h4>
+                                <p class="text-xs text-gray-400 line-clamp-1 mt-1">${vid.description || 'Без описания'}</p>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-2 border-t border-brand-border/60 text-xs text-gray-400">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="user" class="w-3.5 h-3.5 text-gray-500"></i>
+                                    <span class="font-medium text-gray-300">${vid.authorNick}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-brand-red"></i> ${vid.likes}</span>
+                                    <span class="flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5 text-gray-400"></i> ${vid.comments.length}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            calculateTimeLeft(createdAt) {
+                const SEVENTY_TWO_HOURS_MS = 72 * 3600 * 1000;
+                const diff = SEVENTY_TWO_HOURS_MS - (Date.now() - createdAt);
+                if (diff <= 0) return 'Удалено';
+
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                return `${hours}ч ${mins}м`;
+            }
+
+            // Upload & Trimmer Handlers
+            openUploadModal() {
+                document.getElementById('uploadModal').classList.remove('hidden');
+            }
+
+            closeUploadModal() {
+                document.getElementById('uploadModal').classList.add('hidden');
+                document.getElementById('uploadForm').reset();
+                document.getElementById('trimmerSection').classList.add('hidden');
+                this.tempFile = null;
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                document.getElementById('uploadFileText').textContent = `Выбран файл: ${file.name}`;
+                this.tempFile = file;
+
+                if (file.type.startsWith('video/')) {
+                    const videoElem = document.getElementById('trimmerVideo');
+                    videoElem.src = URL.createObjectURL(file);
+                    document.getElementById('trimmerSection').classList.remove('hidden');
+
+                    videoElem.onloadedmetadata = () => {
+                        const duration = Math.floor(videoElem.duration);
+                        const startInput = document.getElementById('startTrim');
+                        const endInput = document.getElementById('endTrim');
+
+                        startInput.max = duration;
+                        startInput.value = 0;
+                        endInput.max = duration;
+                        endInput.value = duration;
+
+                        this.updateTrimmer();
+                    };
+                } else {
+                    document.getElementById('trimmerSection').classList.add('hidden');
+                }
+            }
+
+            updateTrimmer() {
+                const video = document.getElementById('trimmerVideo');
+                const start = parseInt(document.getElementById('startTrim').value);
+                const end = parseInt(document.getElementById('endTrim').value);
+
+                document.getElementById('startTimeLabel').textContent = `${start} сек`;
+                document.getElementById('endTimeLabel').textContent = `${end} сек`;
+                document.getElementById('trimDuration').textContent = `Длительность: ${Math.max(0, end - start)} сек`;
+
+                if (video.currentTime < start || video.currentTime > end) {
+                    video.currentTime = start;
+                }
+            }
+
+            handleUploadSubmit(e) {
+                e.preventDefault();
+                const title = document.getElementById('uploadTitle').value.trim();
+                const desc = document.getElementById('uploadDesc').value.trim();
+
+                let fileUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+                let isPhoto = false;
+
+                if (this.tempFile) {
+                    fileUrl = URL.createObjectURL(this.tempFile);
+                    if (this.tempFile.type.startsWith('image/')) isPhoto = true;
+                }
+
+                const newVideo = {
+                    id: 'vid-' + Date.now(),
+                    title,
+                    description: desc,
+                    type: isPhoto ? 'photo' : 'video',
+                    url: fileUrl,
+                    authorNick: this.user.nick,
+                    authorRole: this.user.role,
+                    server: this.user.server,
+                    createdAt: Date.now(),
+                    likes: 0,
+                    likedBy: [],
+                    comments: []
+                };
+
+                this.videos.unshift(newVideo);
+                localStorage.setItem('rtv_videos', JSON.stringify(this.videos));
+
+                this.closeUploadModal();
+                this.renderFeed();
+                this.showToast('Откат успешно опубликован!');
+            }
+
+            // Player & Modal Features
+            openPlayerModal(id) {
+                const vid = this.videos.find(v => v.id === id);
+                if (!vid) return;
+
+                this.activeVideoId = id;
+                const modal = document.getElementById('playerModal');
+                const mediaContainer = document.getElementById('mediaContainer');
+
+                if (vid.type === 'photo') {
+                    mediaContainer.innerHTML = `<img src="${vid.url}" class="max-h-[80vh] w-auto object-contain rounded-lg">`;
+                } else {
+                    mediaContainer.innerHTML = `
+                        <video src="${vid.url}" controls autoplay class="w-full h-full max-h-[80vh] object-contain">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                }
+
+                document.getElementById('playerTitle').textContent = vid.title;
+                document.getElementById('playerDesc').textContent = vid.description || 'Описание отсутствует.';
+                document.getElementById('playerAuthorNick').textContent = vid.authorNick;
+                document.getElementById('playerAuthorRole').textContent = vid.authorRole === 'admin' ? 'Администратор' : 'Модератор';
+                document.getElementById('playerServerBadge').textContent = vid.server;
+                document.getElementById('playerTimer').innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i> ${this.calculateTimeLeft(vid.createdAt)}`;
+                document.getElementById('likeCount').textContent = vid.likes;
+                document.getElementById('playerAuthorAvatar').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${vid.authorNick}`;
+
+                this.renderComments(vid);
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+
+            closePlayerModal() {
+                const modal = document.getElementById('playerModal');
+                document.getElementById('mediaContainer').innerHTML = '';
+                modal.classList.add('hidden');
+                this.activeVideoId = null;
+            }
+
+            toggleLike() {
+                if (!this.activeVideoId) return;
+                const vid = this.videos.find(v => v.id === this.activeVideoId);
+                if (!vid) return;
+
+                const userIndex = vid.likedBy.indexOf(this.user.nick);
+                if (userIndex === -1) {
+                    vid.likedBy.push(this.user.nick);
+                    vid.likes += 1;
+                    this.showToast('Вам понравилось это видео');
+                } else {
+                    vid.likedBy.splice(userIndex, 1);
+                    vid.likes -= 1;
+                }
+
+                document.getElementById('likeCount').textContent = vid.likes;
+                localStorage.setItem('rtv_videos', JSON.stringify(this.videos));
+                this.renderFeed();
+            }
+
+            renderComments(vid) {
+                const list = document.getElementById('commentsList');
+                if (vid.comments.length === 0) {
+                    list.innerHTML = `<p class="text-xs text-gray-500 italic">Комментариев пока нет...</p>`;
+                    return;
+                }
+
+                list.innerHTML = vid.comments.map(c => `
+                    <div class="bg-brand-panel p-2.5 rounded-lg border border-brand-border text-xs">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-gray-200">${c.nick} <span class="text-[10px] text-brand-red font-mono">(${c.role})</span></span>
+                            <span class="text-[10px] text-gray-500">${c.time || 'Только что'}</span>
+                        </div>
+                        <p class="text-gray-300 leading-snug">${c.text}</p>
+                    </div>
+                `).join('');
+            }
+
+            addComment(e) {
+                e.preventDefault();
+                if (!this.activeVideoId) return;
+
+                const input = document.getElementById('commentInput');
+                const text = input.value.trim();
+                if (!text) return;
+
+                const vid = this.videos.find(v => v.id === this.activeVideoId);
+                vid.comments.push({
+                    nick: this.user.nick,
+                    role: this.user.role === 'admin' ? 'Админ' : 'Мод',
+                    text,
+                    time: 'Только что'
+                });
+
+                localStorage.setItem('rtv_videos', JSON.stringify(this.videos));
+                input.value = '';
+                this.renderComments(vid);
+                this.renderFeed();
+            }
+
+            shareCurrentVideo() {
+                const dummyLink = `${window.location.origin}/#clip=${this.activeVideoId}`;
+                
+                // Copy fallback
+                const tempInput = document.createElement('input');
+                tempInput.value = dummyLink;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                this.showToast('Ссылка на откат скопирована!');
+            }
+
+            triggerAutoCleanup() {
+                const initialCount = this.videos.length;
+                const SEVENTY_TWO_HOURS_MS = 72 * 3600 * 1000;
+                const now = Date.now();
+
+                this.videos = this.videos.filter(v => (now - v.createdAt) < SEVENTY_TWO_HOURS_MS);
+                localStorage.setItem('rtv_videos', JSON.stringify(this.videos));
+
+                const removed = initialCount - this.videos.length;
+                this.renderFeed();
+                this.showToast(`Очистка завершена. Удалено записей: ${removed}`);
+            }
+
+            startTimerInterval() {
+                setInterval(() => {
+                    if (this.user) {
+                        this.renderFeed();
+                    }
+                }, 60000); // refresh timer counts every minute
+            }
+
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                document.getElementById('toastMessage').textContent = msg;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+
+            toggleUserMenu() {
+                if (confirm('Вы действительно хотите выйти из профиля?')) {
+                    localStorage.removeItem('rtv_user');
+                    this.user = null;
+                    this.checkAuthStatus();
+                }
+            }
+
+            resetView() {
+                this.setFilter('all');
+            }
+        }
+
+        // Initialize Application
+        let app;
+        window.onload = () => {
+            app = new RTVApp();
+        };
+    </script>
+</body>
+</html>
+```
