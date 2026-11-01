@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="ru" class="dark">
 <head>
@@ -35,7 +34,6 @@ html
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -64,7 +62,6 @@ html
             box-shadow: 0 0 25px rgba(255, 42, 42, 0.4);
         }
 
-        /* Range Slider Styling */
         input[type=range] {
             accent-color: #ff2a2a;
         }
@@ -74,6 +71,14 @@ html
             background-image: 
                 linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 2s infinite ease-in-out;
         }
     </style>
 </head>
@@ -85,7 +90,6 @@ html
             <!-- Brand Logo -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="app.resetView()">
                 <div class="relative flex items-center justify-center">
-                    <!-- Custom SVG representation of RTV Logo -->
                     <svg class="w-10 h-10 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M20 100 C 20 40, 60 20, 100 20 L 90 80 L 120 80 L 50 180 L 75 110 L 20 100 Z" fill="#FACC15"/>
                         <rect x="90" y="75" width="90" height="50" rx="6" fill="#FFFFFF"/>
@@ -164,6 +168,15 @@ html
                     </div>
                     <span id="count-photo" class="text-xs bg-brand-panel px-2 py-0.5 rounded-full font-mono">0</span>
                 </button>
+
+                <!-- Requests Tab (Visible for Creator & Moderators) -->
+                <button onclick="app.setFilter('requests')" id="nav-requests" class="nav-btn hidden flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-brand-panel hover:text-white transition">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="user-check" class="w-4 h-4 text-brand-yellow"></i>
+                        <span>Заявки на доступ</span>
+                    </div>
+                    <span id="count-requests" class="text-xs bg-brand-yellow/20 text-brand-yellow px-2 py-0.5 rounded-full font-mono font-bold">0</span>
+                </button>
             </div>
 
             <!-- Auto-Deletion Info Box -->
@@ -180,25 +193,12 @@ html
                     <span>Симулировать очистку</span>
                 </button>
             </div>
-
-            <!-- Server Rules / Reminder Card -->
-            <div class="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl text-xs text-gray-400 space-y-2">
-                <div class="flex items-center gap-2 font-bold text-gray-200">
-                    <i data-lucide="shield-alert" class="w-4 h-4 text-brand-yellow"></i>
-                    <span>Памятка администратора</span>
-                </div>
-                <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-400">
-                    <li>Не передавайте ссылки сторонним лицам.</li>
-                    <li>Обязательно укажите таймкоды нарушений в комментариях.</li>
-                    <li>Формат названия: [Фракция/Ник] Причина.</li>
-                </ul>
-            </div>
         </aside>
 
         <!-- MAIN FEED CONTENT -->
         <main class="flex-1 flex flex-col gap-6">
             
-            <!-- Controls Bar (Search, Server Switcher, View toggle) -->
+            <!-- Controls Bar -->
             <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
                 <!-- Search -->
                 <div class="relative w-full sm:w-72">
@@ -231,6 +231,32 @@ html
                 <!-- Dynamic Content Rendered Here -->
             </div>
 
+            <!-- Requests Table Container (Hidden by default) -->
+            <div id="requestsContainer" class="hidden bg-brand-card border border-brand-border rounded-xl overflow-hidden shadow-xl">
+                <div class="p-4 bg-brand-panel border-b border-brand-border flex items-center justify-between">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i data-lucide="shield-check" class="text-brand-yellow w-4 h-4"></i>
+                        <span>Модерация заявок на доступ</span>
+                    </h3>
+                    <span class="text-xs text-gray-400">Одобрение кандидатов</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-brand-bg uppercase text-[10px] text-gray-500 font-mono border-b border-brand-border">
+                            <tr>
+                                <th class="p-3.5">Пользователь</th>
+                                <th class="p-3.5">Сервер</th>
+                                <th class="p-3.5">Запрашиваемая Роль</th>
+                                <th class="p-3.5 text-right">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTableBody" class="divide-y divide-brand-border">
+                            <!-- Dynamic Requests -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Empty State -->
             <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-brand-card border border-brand-border rounded-xl p-8">
                 <div class="w-16 h-16 rounded-full bg-brand-panel flex items-center justify-center text-gray-500 mb-4 border border-brand-border">
@@ -248,10 +274,8 @@ html
 
     <!-- AUTHENTICATION / REGISTRATION MODAL -->
     <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-brand-card border border-brand-red/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl glow-red relative overflow-hidden">
-            <!-- Decorative Accent -->
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-red/10 rounded-full blur-2xl pointer-events-none"></div>
-
+        <!-- REGISTRATION / LOGIN BOX -->
+        <div id="regBox" class="bg-brand-card border border-brand-red/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl glow-red relative overflow-hidden">
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-panel border border-brand-border mb-3">
                     <svg class="w-10 h-10" viewBox="0 0 200 200" fill="none">
@@ -289,21 +313,40 @@ html
                 <!-- Role Selection -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Должность / Роль</label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-3 gap-2">
                         <label class="cursor-pointer">
-                            <input type="radio" name="regRole" value="admin" checked class="peer sr-only">
-                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-3 text-center transition">
-                                <div class="text-sm font-bold text-white">Администратор</div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">Только свои видео</div>
+                            <input type="radio" name="regRole" value="admin" checked onchange="app.toggleMasterKeyField()" class="peer sr-only">
+                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-2.5 text-center transition">
+                                <div class="text-xs font-bold text-white">Админ</div>
+                                <div class="text-[9px] text-gray-400 mt-0.5">Свои видео</div>
                             </div>
                         </label>
                         <label class="cursor-pointer">
-                            <input type="radio" name="regRole" value="moderator" class="peer sr-only">
-                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-3 text-center transition">
-                                <div class="text-sm font-bold text-white">Модератор</div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">Все видео сервера</div>
+                            <input type="radio" name="regRole" value="moderator" onchange="app.toggleMasterKeyField()" class="peer sr-only">
+                            <div class="border border-brand-border peer-checked:border-brand-red peer-checked:bg-brand-red/10 rounded-lg p-2.5 text-center transition">
+                                <div class="text-xs font-bold text-white">Модератор</div>
+                                <div class="text-[9px] text-gray-400 mt-0.5">Все видео</div>
                             </div>
                         </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="regRole" value="creator" onchange="app.toggleMasterKeyField()" class="peer sr-only">
+                            <div class="border border-brand-border peer-checked:border-brand-yellow peer-checked:bg-yellow-500/10 rounded-lg p-2.5 text-center transition">
+                                <div class="text-xs font-bold text-brand-yellow">Создатель</div>
+                                <div class="text-[9px] text-gray-400 mt-0.5">Полный доступ</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Master Key Input (Shown when Creator is selected) -->
+                <div id="masterKeyGroup" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-brand-yellow mb-1.5 flex items-center gap-1">
+                        <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                        <span>Мастер-пароль Создателя</span>
+                    </label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-yellow"></i>
+                        <input type="password" id="masterKeyInput" placeholder="Введите мастер-пароль" class="w-full bg-brand-bg border border-brand-yellow/40 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-yellow transition">
                     </div>
                 </div>
 
@@ -317,9 +360,25 @@ html
                 </div>
 
                 <button type="submit" class="w-full bg-brand-red hover:bg-red-600 text-white font-bold py-3 rounded-lg transition shadow-lg glow-red mt-2">
-                    Войти в систему R-TV
+                    Подать заявку / Войти
                 </button>
             </form>
+        </div>
+
+        <!-- WAITING FOR APPROVAL BOX -->
+        <div id="waitingBox" class="hidden bg-brand-card border border-brand-yellow/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-brand-yellow flex items-center justify-center mx-auto animate-pulse-slow">
+                <i data-lucide="clock" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Ожидание подтверждения</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">
+                Ваша заявка отправлена. Доступ к видеохостингу откроется после одобрения модератором вашего сервера или Создателем.
+            </p>
+            <div class="pt-2">
+                <button onclick="app.resetForm()" class="w-full bg-brand-panel hover:bg-brand-border text-gray-300 font-semibold py-2.5 rounded-lg border border-brand-border text-xs transition">
+                    Сменить аккаунт / Сбросить
+                </button>
+            </div>
         </div>
     </div>
 
@@ -337,7 +396,6 @@ html
             <p class="text-xs text-gray-400 mb-6">Поддерживаются форматы MP4, WebM, JPG, PNG. Максимальный срок хранения — 72 часа.</p>
 
             <form id="uploadForm" onsubmit="app.handleUploadSubmit(event)" class="space-y-4">
-                <!-- Dropzone / File Picker -->
                 <div id="dropzone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-brand-border hover:border-brand-red rounded-xl p-6 text-center cursor-pointer transition bg-brand-bg/50">
                     <input type="file" id="fileInput" accept="video/*,image/*" class="hidden" onchange="app.handleFileSelect(event)">
                     <i data-lucide="file-video" class="w-10 h-10 text-brand-red mx-auto mb-2"></i>
@@ -345,19 +403,16 @@ html
                     <p class="text-xs text-gray-500 mt-1">Видео до 100 МБ или Изображение</p>
                 </div>
 
-                <!-- Trim Preview Section (If Video) -->
                 <div id="trimmerSection" class="hidden space-y-3 bg-brand-panel p-4 rounded-xl border border-brand-border">
                     <div class="flex items-center justify-between text-xs font-semibold text-gray-300">
                         <span class="flex items-center gap-1.5"><i data-lucide="scissors" class="w-3.5 h-3.5 text-brand-red"></i> Обрезка видео</span>
                         <span id="trimDuration" class="font-mono text-brand-yellow">00:00 - 00:00</span>
                     </div>
 
-                    <!-- Video Element Preview -->
                     <div class="relative bg-black rounded-lg overflow-hidden max-h-56 flex justify-center">
                         <video id="trimmerVideo" class="w-full h-auto max-h-56 object-contain" controls></video>
                     </div>
 
-                    <!-- Range Trimmers -->
                     <div class="space-y-2 pt-2">
                         <div>
                             <div class="flex justify-between text-[11px] text-gray-400 mb-1">
@@ -376,7 +431,6 @@ html
                     </div>
                 </div>
 
-                <!-- Details -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">Название записи / Нарушение</label>
                     <input type="text" id="uploadTitle" required placeholder="[LSPD] Игрок #12412 - DM in GreenZone" class="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition">
@@ -398,17 +452,13 @@ html
     <!-- PLAYER & COMMENTS MODAL -->
     <div id="playerModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md hidden">
         <div class="bg-brand-card border border-brand-border rounded-2xl max-w-4xl w-full flex flex-col lg:flex-row overflow-hidden shadow-2xl max-h-[95vh]">
-            <!-- Video/Photo Display Container -->
             <div class="lg:w-2/3 bg-black flex flex-col justify-center items-center relative min-h-[300px]">
                 <button onclick="app.closePlayerModal()" class="lg:hidden absolute top-3 right-3 z-10 text-white bg-black/60 p-1.5 rounded-full">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                <div id="mediaContainer" class="w-full h-full flex items-center justify-center">
-                    <!-- Dynamic Media (Video or Image) -->
-                </div>
+                <div id="mediaContainer" class="w-full h-full flex items-center justify-center"></div>
             </div>
 
-            <!-- Side Sidebar: Details, Timer, Comments -->
             <div class="lg:w-1/3 flex flex-col p-4 bg-brand-card border-t lg:border-t-0 lg:border-l border-brand-border max-h-[500px] lg:max-h-none overflow-y-auto">
                 <div class="flex items-center justify-between pb-3 border-b border-brand-border">
                     <div class="flex items-center gap-2">
@@ -423,21 +473,18 @@ html
                     </button>
                 </div>
 
-                <!-- Video Meta -->
                 <div class="py-3 border-b border-brand-border space-y-2">
                     <h3 id="playerTitle" class="font-bold text-gray-100 text-base leading-snug">Title Here</h3>
                     <p id="playerDesc" class="text-xs text-gray-400 whitespace-pre-line leading-relaxed">Description...</p>
                     
                     <div class="flex items-center justify-between pt-1">
                         <span id="playerServerBadge" class="text-[11px] font-mono text-brand-yellow bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">Server 01</span>
-                        <!-- Live Timer Tag -->
                         <span id="playerTimer" class="text-[11px] font-mono text-brand-red bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 flex items-center gap-1">
                             <i data-lucide="clock" class="w-3 h-3"></i> 71ч 59м
                         </span>
                     </div>
                 </div>
 
-                <!-- Social Actions -->
                 <div class="flex items-center justify-between py-3 border-b border-brand-border">
                     <button id="likeBtn" onclick="app.toggleLike()" class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-panel hover:bg-brand-border text-gray-300 transition">
                         <i data-lucide="heart" class="w-4 h-4 text-brand-red"></i>
@@ -450,15 +497,10 @@ html
                     </button>
                 </div>
 
-                <!-- Comments Section -->
                 <div class="flex-1 flex flex-col pt-3 min-h-[180px]">
                     <span class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Комментарии</span>
-                    
-                    <div id="commentsList" class="flex-1 space-y-3 overflow-y-auto max-h-[220px] pr-1 mb-3">
-                        <!-- Dynamic Comments -->
-                    </div>
+                    <div id="commentsList" class="flex-1 space-y-3 overflow-y-auto max-h-[220px] pr-1 mb-3"></div>
 
-                    <!-- New Comment Input -->
                     <form onsubmit="app.addComment(event)" class="mt-auto flex gap-2">
                         <input type="text" id="commentInput" required placeholder="Написать комментарий..." class="flex-1 bg-brand-bg border border-brand-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-red transition">
                         <button type="submit" class="bg-brand-red hover:bg-red-600 text-white p-2 rounded-lg transition">
@@ -478,7 +520,8 @@ html
 
     <!-- MAIN APP JAVASCRIPT LOGIC -->
     <script>
-        // Mock DB Initial Data
+        const MASTER_CREATOR_KEY = "rtv2026"; // Secret master password for Creator role
+
         const INITIAL_MOCK_VIDEOS = [
             {
                 id: 'vid-101',
@@ -489,7 +532,7 @@ html
                 authorNick: 'Alexander_Gromov',
                 authorRole: 'admin',
                 server: 'Server 01',
-                createdAt: Date.now() - (10 * 3600 * 1000), // 10 hours ago
+                createdAt: Date.now() - (10 * 3600 * 1000),
                 likes: 5,
                 likedBy: [],
                 comments: [
@@ -505,36 +548,8 @@ html
                 authorNick: 'Kate_Nights',
                 authorRole: 'moderator',
                 server: 'Server 01',
-                createdAt: Date.now() - (48 * 3600 * 1000), // 48 hours ago
+                createdAt: Date.now() - (48 * 3600 * 1000),
                 likes: 12,
-                likedBy: [],
-                comments: []
-            },
-            {
-                id: 'photo-103',
-                title: 'Скриншот чита / FlyCar ID 4412',
-                description: 'Доказательство использования читов (полет на авто).',
-                type: 'photo',
-                url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
-                authorNick: 'Alexander_Gromov',
-                authorRole: 'admin',
-                server: 'Server 01',
-                createdAt: Date.now() - (65 * 3600 * 1000), // 65 hours ago
-                likes: 3,
-                likedBy: [],
-                comments: []
-            },
-            {
-                id: 'vid-104',
-                title: '[Server 02] NonRP Drive & SK',
-                description: 'Фиксация с сервера #02',
-                type: 'video',
-                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-                authorNick: 'Sergey_V',
-                authorRole: 'admin',
-                server: 'Server 02',
-                createdAt: Date.now() - (5 * 3600 * 1000),
-                likes: 1,
                 likedBy: [],
                 comments: []
             }
@@ -543,9 +558,10 @@ html
         class RTVApp {
             constructor() {
                 this.user = JSON.parse(localStorage.getItem('rtv_user')) || null;
+                this.users = JSON.parse(localStorage.getItem('rtv_users_db')) || [];
                 this.videos = JSON.parse(localStorage.getItem('rtv_videos')) || INITIAL_MOCK_VIDEOS;
-                this.currentFilter = 'all'; // 'all', 'my', 'photo'
-                this.viewMode = 'grid'; // 'grid' or 'list'
+                this.currentFilter = 'all'; 
+                this.viewMode = 'grid'; 
                 this.activeVideoId = null;
                 this.tempFile = null;
 
@@ -571,13 +587,46 @@ html
                 }
             }
 
+            toggleMasterKeyField() {
+                const role = document.querySelector('input[name="regRole"]:checked').value;
+                const masterKeyGroup = document.getElementById('masterKeyGroup');
+                if (role === 'creator') {
+                    masterKeyGroup.classList.remove('hidden');
+                } else {
+                    masterKeyGroup.classList.add('hidden');
+                }
+            }
+
             checkAuthStatus() {
                 const mainWrapper = document.getElementById('mainWrapper');
                 const authModal = document.getElementById('authModal');
+                const regBox = document.getElementById('regBox');
+                const waitingBox = document.getElementById('waitingBox');
                 const headerUserArea = document.getElementById('headerUserArea');
                 const headerLoginBtn = document.getElementById('headerLoginBtn');
+                const navRequests = document.getElementById('nav-requests');
 
-                if (this.user) {
+                if (!this.user) {
+                    mainWrapper.classList.add('blur-locked');
+                    authModal.classList.remove('hidden');
+                    regBox.classList.remove('hidden');
+                    waitingBox.classList.add('hidden');
+                    headerUserArea.classList.add('hidden');
+                    headerLoginBtn.classList.remove('hidden');
+                    return;
+                }
+
+                // Sync status with DB
+                const dbUser = this.users.find(u => u.id === this.user.id);
+                if (dbUser) this.user = dbUser;
+
+                if (this.user.status === 'pending') {
+                    mainWrapper.classList.add('blur-locked');
+                    authModal.classList.remove('hidden');
+                    regBox.classList.add('hidden');
+                    waitingBox.classList.remove('hidden');
+                    headerUserArea.classList.add('hidden');
+                } else if (this.user.status === 'approved') {
                     mainWrapper.classList.remove('blur-locked');
                     authModal.classList.add('hidden');
                     headerUserArea.classList.remove('hidden');
@@ -586,15 +635,21 @@ html
                     document.getElementById('headerNick').textContent = this.user.nick;
                     document.getElementById('headerAvatar').src = this.user.avatar;
                     document.getElementById('headerServerBadge').textContent = this.user.server;
-                    document.getElementById('headerRoleBadge').textContent = this.user.role === 'admin' ? 'Администратор' : 'Модератор';
+                    
+                    let roleTitle = 'Администратор';
+                    if (this.user.role === 'creator') roleTitle = 'Создатель';
+                    else if (this.user.role === 'moderator') roleTitle = 'Модератор';
+                    
+                    document.getElementById('headerRoleBadge').textContent = roleTitle;
                     document.getElementById('activeServerDisplay').textContent = this.user.server;
 
+                    if (this.user.role === 'moderator' || this.user.role === 'creator') {
+                        navRequests.classList.remove('hidden');
+                    } else {
+                        navRequests.classList.add('hidden');
+                    }
+
                     this.renderFeed();
-                } else {
-                    mainWrapper.classList.add('blur-locked');
-                    authModal.classList.remove('hidden');
-                    headerUserArea.classList.add('hidden');
-                    headerLoginBtn.classList.remove('hidden');
                 }
             }
 
@@ -607,13 +662,38 @@ html
                 const nick = document.getElementById('regNick').value.trim();
                 const server = document.getElementById('regServer').value;
                 const role = document.querySelector('input[name="regRole"]:checked').value;
+                const masterKey = document.getElementById('masterKeyInput').value;
                 const avatar = document.getElementById('regAvatarUrl').value.trim() || 
                     `https://api.dicebear.com/7.x/identicon/svg?seed=${nick}`;
 
-                this.user = { nick, server, role, avatar };
+                if (role === 'creator') {
+                    if (masterKey !== MASTER_CREATOR_KEY) {
+                        this.showToast('Неверный Мастер-пароль Создателя!');
+                        return;
+                    }
+                }
+
+                const newUser = {
+                    id: Date.now(),
+                    nick,
+                    server,
+                    role,
+                    avatar,
+                    status: (role === 'creator') ? 'approved' : 'pending'
+                };
+
+                this.users.push(newUser);
+                localStorage.setItem('rtv_users_db', JSON.stringify(this.users));
+
+                this.user = newUser;
                 localStorage.setItem('rtv_user', JSON.stringify(this.user));
 
-                this.showToast(`Добро пожаловать, ${nick}!`);
+                this.checkAuthStatus();
+            }
+
+            resetForm() {
+                localStorage.removeItem('rtv_user');
+                this.user = null;
                 this.checkAuthStatus();
             }
 
@@ -622,34 +702,27 @@ html
                 img.src = url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces';
             }
 
-            // Filtering & Access Controls Logic
             getFilteredVideos() {
                 if (!this.user) return [];
 
                 let list = this.videos;
-
-                // 72 Hours filter
                 const now = Date.now();
                 const SEVENTY_TWO_HOURS = 72 * 3600 * 1000;
                 list = list.filter(v => (now - v.createdAt) < SEVENTY_TWO_HOURS);
 
-                // Role Logic:
-                // Administrator -> Sees ONLY their own clips
-                // Moderator -> Sees all clips on their selected server
                 if (this.user.role === 'admin') {
                     list = list.filter(v => v.authorNick === this.user.nick);
                 } else if (this.user.role === 'moderator') {
                     list = list.filter(v => v.server === this.user.server);
                 }
+                // Creator sees all videos on all servers
 
-                // Tab Filter
                 if (this.currentFilter === 'my') {
                     list = list.filter(v => v.authorNick === this.user.nick);
                 } else if (this.currentFilter === 'photo') {
                     list = list.filter(v => v.type === 'photo');
                 }
 
-                // Search Filter
                 const search = document.getElementById('searchInput').value.toLowerCase();
                 if (search) {
                     list = list.filter(v => v.title.toLowerCase().includes(search) || v.authorNick.toLowerCase().includes(search));
@@ -683,17 +756,23 @@ html
 
             renderFeed() {
                 const container = document.getElementById('feedContainer');
+                const requestsContainer = document.getElementById('requestsContainer');
                 const emptyState = document.getElementById('emptyState');
-                const videos = this.getFilteredVideos();
 
-                // Update counts in sidebar
-                const allVisible = this.videos.filter(v => {
-                    if (this.user.role === 'admin') return v.authorNick === this.user.nick;
-                    return v.server === this.user.server;
-                });
-                document.getElementById('count-all').textContent = allVisible.length;
-                document.getElementById('count-my').textContent = allVisible.filter(v => v.authorNick === this.user.nick).length;
-                document.getElementById('count-photo').textContent = allVisible.filter(v => v.type === 'photo').length;
+                if (this.currentFilter === 'requests') {
+                    container.classList.add('hidden');
+                    emptyState.classList.add('hidden');
+                    requestsContainer.classList.remove('hidden');
+                    this.renderRequestsTable();
+                    return;
+                }
+
+                requestsContainer.classList.add('hidden');
+                container.classList.remove('hidden');
+
+                const videos = this.getFilteredVideos();
+                const pendingCount = this.getPendingUsers().length;
+                document.getElementById('count-requests').textContent = pendingCount;
 
                 if (videos.length === 0) {
                     container.innerHTML = '';
@@ -711,6 +790,63 @@ html
 
                 container.innerHTML = videos.map(vid => this.createCardHTML(vid)).join('');
                 lucide.createIcons();
+            }
+
+            getPendingUsers() {
+                return this.users.filter(u => {
+                    if (u.status !== 'pending') return false;
+                    if (this.user.role === 'creator') return true;
+                    if (this.user.role === 'moderator') {
+                        return u.server === this.user.server && u.role === 'admin';
+                    }
+                    return false;
+                });
+            }
+
+            renderRequestsTable() {
+                const tbody = document.getElementById('requestsTableBody');
+                const pending = this.getPendingUsers();
+
+                if (pending.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Заявок на рассмотрение нет</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = pending.map(u => `
+                    <tr class="hover:bg-brand-panel/50 transition">
+                        <td class="p-3.5 flex items-center gap-2">
+                            <img src="${u.avatar}" class="w-6 h-6 rounded-full border border-brand-border object-cover">
+                            <span class="font-bold text-white">${u.nick}</span>
+                        </td>
+                        <td class="p-3.5 font-mono text-brand-yellow">${u.server}</td>
+                        <td class="p-3.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${u.role === 'moderator' ? 'bg-yellow-500/10 text-brand-yellow border border-yellow-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">
+                                ${u.role === 'moderator' ? 'Модератор' : 'Администратор'}
+                            </span>
+                        </td>
+                        <td class="p-3.5 text-right space-x-1">
+                            <button onclick="app.approveUser(${u.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded text-[11px] transition">Одобрить</button>
+                            <button onclick="app.rejectUser(${u.id})" class="bg-red-600 hover:bg-red-500 text-white font-bold px-3 py-1 rounded text-[11px] transition">Отклонить</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            approveUser(userId) {
+                const target = this.users.find(u => u.id === userId);
+                if (target) {
+                    target.status = 'approved';
+                    localStorage.setItem('rtv_users_db', JSON.stringify(this.users));
+                    this.showToast(`Заявка ${target.nick} одобрена!`);
+                    this.renderFeed();
+                }
+            }
+
+            rejectUser(userId) {
+                this.users = this.users.filter(u => u.id !== userId);
+                localStorage.setItem('rtv_users_db', JSON.stringify(this.users));
+                this.showToast('Заявка отклонена');
+                this.renderFeed();
             }
 
             createCardHTML(vid) {
@@ -746,7 +882,6 @@ html
 
                 return `
                     <div onclick="app.openPlayerModal('${vid.id}')" class="bg-brand-card border border-brand-border hover:border-brand-red/50 rounded-xl overflow-hidden flex flex-col cursor-pointer transition glow-red-hover group">
-                        <!-- Thumbnail Preview -->
                         <div class="relative aspect-video bg-black flex items-center justify-center border-b border-brand-border overflow-hidden">
                             ${isPhoto 
                                 ? `<img src="${vid.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
@@ -758,7 +893,6 @@ html
                                    </div>`
                             }
 
-                            <!-- Badges -->
                             <div class="absolute top-2 left-2 flex gap-1">
                                 <span class="bg-black/70 backdrop-blur-md text-brand-yellow font-mono text-[10px] px-2 py-0.5 rounded border border-brand-yellow/30 font-bold">
                                     ${vid.server}
@@ -771,7 +905,6 @@ html
                             </div>
                         </div>
 
-                        <!-- Info -->
                         <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
                             <div>
                                 <h4 class="font-bold text-sm text-white group-hover:text-brand-red transition line-clamp-2 leading-snug">${vid.title}</h4>
@@ -803,7 +936,6 @@ html
                 return `${hours}ч ${mins}м`;
             }
 
-            // Upload & Trimmer Handlers
             openUploadModal() {
                 document.getElementById('uploadModal').classList.remove('hidden');
             }
@@ -894,7 +1026,6 @@ html
                 this.showToast('Откат успешно опубликован!');
             }
 
-            // Player & Modal Features
             openPlayerModal(id) {
                 const vid = this.videos.find(v => v.id === id);
                 if (!vid) return;
@@ -996,15 +1127,12 @@ html
 
             shareCurrentVideo() {
                 const dummyLink = `${window.location.origin}/#clip=${this.activeVideoId}`;
-                
-                // Copy fallback
                 const tempInput = document.createElement('input');
                 tempInput.value = dummyLink;
                 document.body.appendChild(tempInput);
                 tempInput.select();
                 document.execCommand('copy');
                 document.body.removeChild(tempInput);
-
                 this.showToast('Ссылка на откат скопирована!');
             }
 
@@ -1026,7 +1154,7 @@ html
                     if (this.user) {
                         this.renderFeed();
                     }
-                }, 60000); // refresh timer counts every minute
+                }, 60000);
             }
 
             showToast(msg) {
@@ -1052,7 +1180,6 @@ html
             }
         }
 
-        // Initialize Application
         let app;
         window.onload = () => {
             app = new RTVApp();
@@ -1060,4 +1187,3 @@ html
     </script>
 </body>
 </html>
-```
