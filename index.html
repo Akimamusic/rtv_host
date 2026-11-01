@@ -29,9 +29,8 @@
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome Icons & Lucide Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         ::-webkit-scrollbar {
@@ -87,10 +86,9 @@
     <!-- APP HEADER -->
     <header class="sticky top-0 z-30 bg-brand-bg/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3 flex items-center justify-between transition-all">
         <div class="flex items-center gap-4">
-            <!-- Brand Logo -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="app.resetView()">
                 <div class="relative flex items-center justify-center">
-                    <svg class="w-10 h-10 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-10 h-10 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" viewBox="0 0 200 200" fill="none">
                         <path d="M20 100 C 20 40, 60 20, 100 20 L 90 80 L 120 80 L 50 180 L 75 110 L 20 100 Z" fill="#FACC15"/>
                         <rect x="90" y="75" width="90" height="50" rx="6" fill="#FFFFFF"/>
                         <text x="100" y="112" font-family="Arial, sans-serif" font-weight="900" font-size="36" fill="#FACC15">TV</text>
@@ -106,27 +104,21 @@
             </div>
         </div>
 
-        <!-- Header Actions / User Info -->
         <div class="flex items-center gap-3">
             <div id="headerUserArea" class="hidden flex items-center gap-3">
-                <!-- Server Badge -->
                 <div class="hidden md:flex flex-col items-end">
-                    <span id="headerServerBadge" class="text-xs font-semibold text-brand-yellow bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-0.5 rounded-full">
-                        Server #01
-                    </span>
+                    <span id="headerServerBadge" class="text-xs font-semibold text-brand-yellow bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-0.5 rounded-full">Server #01</span>
                     <span id="headerRoleBadge" class="text-[10px] text-gray-400 font-medium">Модератор</span>
                 </div>
 
-                <!-- Upload Button -->
                 <button onclick="app.openUploadModal()" class="flex items-center gap-2 bg-brand-red hover:bg-red-600 text-white px-3.5 py-2 rounded-lg font-medium text-sm transition shadow-lg glow-red-hover active:scale-95">
                     <i data-lucide="upload" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Загрузить откат</span>
                 </button>
 
-                <!-- Profile Dropdown Trigger -->
-                <div class="flex items-center gap-2 bg-brand-panel border border-brand-border p-1.5 pl-3 rounded-lg cursor-pointer hover:border-gray-600 transition" onclick="app.toggleUserMenu()">
+                <div class="flex items-center gap-2 bg-brand-panel border border-brand-border p-1.5 pl-3 rounded-lg cursor-pointer hover:border-gray-600 transition" onclick="app.openLogoutConfirm()">
                     <span id="headerNick" class="text-sm font-bold max-w-[120px] truncate">Admin_User</span>
-                    <img id="headerAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces" class="w-8 h-8 rounded-md object-cover border border-brand-red" alt="Avatar">
+                    <img id="headerAvatar" src="" class="w-8 h-8 rounded-md object-cover border border-brand-red" alt="Avatar">
                 </div>
             </div>
 
@@ -141,10 +133,10 @@
         
         <!-- SIDEBAR NAVIGATION -->
         <aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-4">
-            <!-- Navigation Card -->
             <div class="bg-brand-card border border-brand-border rounded-xl p-3 flex flex-col gap-1 shadow-xl">
                 <div class="text-xs font-semibold text-gray-400 px-3 py-2 uppercase tracking-wider">Навигация</div>
                 
+                <!-- Hidden for pure Admins -->
                 <button onclick="app.setFilter('all')" id="nav-all" class="nav-btn flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium bg-brand-red text-white transition">
                     <div class="flex items-center gap-3">
                         <i data-lucide="film" class="w-4 h-4"></i>
@@ -169,7 +161,6 @@
                     <span id="count-photo" class="text-xs bg-brand-panel px-2 py-0.5 rounded-full font-mono">0</span>
                 </button>
 
-                <!-- Requests Tab (Visible for Creator & Moderators) -->
                 <button onclick="app.setFilter('requests')" id="nav-requests" class="nav-btn hidden flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-brand-panel hover:text-white transition">
                     <div class="flex items-center gap-3">
                         <i data-lucide="user-check" class="w-4 h-4 text-brand-yellow"></i>
@@ -177,9 +168,16 @@
                     </div>
                     <span id="count-requests" class="text-xs bg-brand-yellow/20 text-brand-yellow px-2 py-0.5 rounded-full font-mono font-bold">0</span>
                 </button>
+
+                <button onclick="app.setFilter('users')" id="nav-users" class="nav-btn hidden flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-brand-panel hover:text-white transition">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="users" class="w-4 h-4 text-brand-red"></i>
+                        <span>Пользователи</span>
+                    </div>
+                    <span id="count-users" class="text-xs bg-brand-panel px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
             </div>
 
-            <!-- Auto-Deletion Info Box -->
             <div class="bg-brand-card border border-brand-border rounded-xl p-4 shadow-xl flex flex-col gap-3">
                 <div class="flex items-center gap-2 text-brand-red font-semibold text-sm">
                     <i data-lucide="clock" class="w-4 h-4"></i>
@@ -197,16 +195,12 @@
 
         <!-- MAIN FEED CONTENT -->
         <main class="flex-1 flex flex-col gap-6">
-            
-            <!-- Controls Bar -->
             <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-                <!-- Search -->
                 <div class="relative w-full sm:w-72">
                     <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <input type="text" id="searchInput" oninput="app.renderFeed()" placeholder="Поиск по нику или названию..." class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-red transition">
                 </div>
 
-                <!-- Info Badges & Server Selector -->
                 <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <div class="flex items-center gap-1.5 text-xs text-gray-400 bg-brand-panel px-3 py-2 rounded-lg border border-brand-border">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
@@ -214,7 +208,6 @@
                         <strong id="activeServerDisplay" class="text-white font-mono">Server 01</strong>
                     </div>
 
-                    <!-- View Switcher -->
                     <div class="flex items-center bg-brand-bg p-1 rounded-lg border border-brand-border">
                         <button onclick="app.setViewMode('grid')" id="viewGridBtn" class="p-1.5 rounded text-brand-red bg-brand-panel transition">
                             <i data-lucide="grid" class="w-4 h-4"></i>
@@ -226,12 +219,10 @@
                 </div>
             </div>
 
-            <!-- Feed Grid / List Container -->
-            <div id="feedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- Dynamic Content Rendered Here -->
-            </div>
+            <!-- Feed Grid Container -->
+            <div id="feedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
-            <!-- Requests Table Container (Hidden by default) -->
+            <!-- Requests Table Container -->
             <div id="requestsContainer" class="hidden bg-brand-card border border-brand-border rounded-xl overflow-hidden shadow-xl">
                 <div class="p-4 bg-brand-panel border-b border-brand-border flex items-center justify-between">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -250,9 +241,32 @@
                                 <th class="p-3.5 text-right">Действия</th>
                             </tr>
                         </thead>
-                        <tbody id="requestsTableBody" class="divide-y divide-brand-border">
-                            <!-- Dynamic Requests -->
-                        </tbody>
+                        <tbody id="requestsTableBody" class="divide-y divide-brand-border"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users Management Container -->
+            <div id="usersContainer" class="hidden bg-brand-card border border-brand-border rounded-xl overflow-hidden shadow-xl">
+                <div class="p-4 bg-brand-panel border-b border-brand-border flex items-center justify-between">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i data-lucide="users" class="text-brand-red w-4 h-4"></i>
+                        <span>Управление пользователями хостинга</span>
+                    </h3>
+                    <span class="text-xs text-gray-400">Администраторы сервера</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-brand-bg uppercase text-[10px] text-gray-500 font-mono border-b border-brand-border">
+                            <tr>
+                                <th class="p-3.5">Пользователь</th>
+                                <th class="p-3.5">Сервер</th>
+                                <th class="p-3.5">Текущая Роль</th>
+                                <th class="p-3.5">Откаты</th>
+                                <th class="p-3.5 text-right">Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-brand-border"></tbody>
                     </table>
                 </div>
             </div>
@@ -263,18 +277,58 @@
                     <i data-lucide="video-off" class="w-8 h-8"></i>
                 </div>
                 <h3 class="text-lg font-bold text-gray-200 mb-1">Откаты не найдены</h3>
-                <p class="text-sm text-gray-400 max-w-md mb-6">В данном разделе нет загруженных видеозаписей или ваш уровень доступа ограничен только просмотром собственных откатов.</p>
+                <p class="text-sm text-gray-400 max-w-md mb-6">В данном разделе нет загруженных видеозаписей или ваш доступ ограничен только просмотром собственных откатов.</p>
                 <button onclick="app.openUploadModal()" class="bg-brand-red hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg glow-red">
                     Загрузить первый откат
                 </button>
             </div>
-
         </main>
+    </div>
+
+    <!-- CUSTOM LOGOUT CONFIRMATION MODAL -->
+    <div id="logoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="bg-brand-card border border-brand-red/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl glow-red text-center space-y-4">
+            <div class="w-14 h-14 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red flex items-center justify-center mx-auto">
+                <i data-lucide="log-out" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-white">Выход из системы</h3>
+                <p class="text-xs text-gray-400 mt-1">Вы действительно хотите выйти из своего профиля?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="app.closeLogoutConfirm()" class="flex-1 bg-brand-panel hover:bg-brand-border text-gray-300 font-semibold py-2.5 rounded-lg border border-brand-border text-xs transition">
+                    Отмена
+                </button>
+                <button onclick="app.logout()" class="flex-1 bg-brand-red hover:bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-lg glow-red">
+                    Выйти
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DELETE USER CONFIRMATION MODAL -->
+    <div id="deleteUserModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="bg-brand-card border border-brand-red/50 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <div class="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 text-brand-red flex items-center justify-center mx-auto">
+                <i data-lucide="user-x" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-white">Снять доступ с хостинга?</h3>
+                <p id="deleteUserWarningText" class="text-xs text-gray-400 mt-1">Пользователь больше не сможет войти и просматривать откаты.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="app.closeDeleteUserConfirm()" class="flex-1 bg-brand-panel hover:bg-brand-border text-gray-300 font-semibold py-2.5 rounded-lg border border-brand-border text-xs transition">
+                    Отмена
+                </button>
+                <button onclick="app.executeRemoveUser()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-lg">
+                    Удалить
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- AUTHENTICATION / REGISTRATION MODAL -->
     <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <!-- REGISTRATION / LOGIN BOX -->
         <div id="regBox" class="bg-brand-card border border-brand-red/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl glow-red relative overflow-hidden">
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-panel border border-brand-border mb-3">
@@ -289,7 +343,6 @@
             </div>
 
             <form id="authForm" onsubmit="app.handleAuth(event)" class="space-y-4">
-                <!-- Nickname Input -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Игровой Никнейм (Nick_Name)</label>
                     <div class="relative">
@@ -298,19 +351,17 @@
                     </div>
                 </div>
 
-                <!-- Server Selection (30 Servers) -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Выбор сервера (1 - 30)</label>
                     <div class="relative">
                         <i data-lucide="server" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                        <select id="regServer" required class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition appearance-none">
-                            <!-- Populated JS -->
+                        <select id="regServer" required class="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-4 py-2.5 text-sm font-mono text-brand-yellow focus:outline-none focus:border-brand-red transition appearance-none">
+                            <!-- JS Generated Options -->
                         </select>
                         <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
                     </div>
                 </div>
 
-                <!-- Role Selection -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Должность / Роль</label>
                     <div class="grid grid-cols-3 gap-2">
@@ -338,7 +389,6 @@
                     </div>
                 </div>
 
-                <!-- Master Key Input (Shown when Creator is selected) -->
                 <div id="masterKeyGroup" class="hidden">
                     <label class="block text-xs font-semibold uppercase tracking-wider text-brand-yellow mb-1.5 flex items-center gap-1">
                         <i data-lucide="key" class="w-3.5 h-3.5"></i>
@@ -350,7 +400,6 @@
                     </div>
                 </div>
 
-                <!-- Avatar Selection -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Аватар профиля</label>
                     <div class="flex items-center gap-3">
@@ -365,7 +414,6 @@
             </form>
         </div>
 
-        <!-- WAITING FOR APPROVAL BOX -->
         <div id="waitingBox" class="hidden bg-brand-card border border-brand-yellow/40 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-brand-yellow flex items-center justify-center mx-auto animate-pulse-slow">
                 <i data-lucide="clock" class="w-8 h-8"></i>
@@ -374,8 +422,11 @@
             <p class="text-xs text-gray-400 leading-relaxed">
                 Ваша заявка отправлена. Доступ к видеохостингу откроется после одобрения модератором вашего сервера или Создателем.
             </p>
-            <div class="pt-2">
-                <button onclick="app.resetForm()" class="w-full bg-brand-panel hover:bg-brand-border text-gray-300 font-semibold py-2.5 rounded-lg border border-brand-border text-xs transition">
+            <div class="pt-2 flex flex-col gap-2">
+                <button onclick="app.simulateSelfApprove()" class="w-full bg-brand-red hover:bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-lg glow-red">
+                    Симулировать одобрение (Демо)
+                </button>
+                <button onclick="app.resetForm()" class="w-full bg-brand-panel hover:bg-brand-border text-gray-300 font-semibold py-2 rounded-lg border border-brand-border text-xs transition">
                     Сменить аккаунт / Сбросить
                 </button>
             </div>
@@ -518,9 +569,9 @@
         <span id="toastMessage" class="text-sm font-medium">Уведомление</span>
     </div>
 
-    <!-- MAIN APP JAVASCRIPT LOGIC -->
+    <!-- MAIN APP SCRIPT -->
     <script>
-        const MASTER_CREATOR_KEY = "rtv2026"; // Secret master password for Creator role
+        const MASTER_CREATOR_KEY = "rtv2026";
 
         const INITIAL_MOCK_VIDEOS = [
             {
@@ -536,18 +587,18 @@
                 likes: 5,
                 likedBy: [],
                 comments: [
-                    { nick: 'Dmitry_M', role: 'moderator', text: 'Наказание выдано верно. 180 минут деморгана.', time: '8 ч. назад' }
+                    { nick: 'Dmitry_M', role: 'moderator', text: 'Наказание выдано верно.', time: '8 ч. назад' }
                 ]
             },
             {
                 id: 'vid-102',
                 title: '[LSPD] Уход от RP в воду #1290',
-                description: 'Погоня продолжалась 5 минут, после чего подозреваемый спрыгнул с пирса.',
+                description: 'Погоня продолжалась 5 минут.',
                 type: 'video',
                 url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
                 authorNick: 'Kate_Nights',
                 authorRole: 'moderator',
-                server: 'Server 01',
+                server: 'Server 05',
                 createdAt: Date.now() - (48 * 3600 * 1000),
                 likes: 12,
                 likedBy: [],
@@ -562,27 +613,26 @@
                 this.videos = JSON.parse(localStorage.getItem('rtv_videos')) || INITIAL_MOCK_VIDEOS;
                 this.currentFilter = 'all'; 
                 this.viewMode = 'grid'; 
-                this.activeVideoId = null;
-                this.tempFile = null;
+                this.pendingDeleteUserId = null;
 
                 this.init();
             }
 
             init() {
-                this.populateServerDropdown();
+                this.populateServerSelect();
                 this.checkAuthStatus();
                 this.startTimerInterval();
                 lucide.createIcons();
             }
 
-            populateServerDropdown() {
+            populateServerSelect() {
                 const select = document.getElementById('regServer');
                 select.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
                     const num = i < 10 ? `0${i}` : `${i}`;
                     const opt = document.createElement('option');
                     opt.value = `Server ${num}`;
-                    opt.textContent = `Server #${num} | R-TV Main`;
+                    opt.textContent = `SERVER #${num} | R-TV MAIN`;
                     select.appendChild(opt);
                 }
             }
@@ -604,7 +654,9 @@
                 const waitingBox = document.getElementById('waitingBox');
                 const headerUserArea = document.getElementById('headerUserArea');
                 const headerLoginBtn = document.getElementById('headerLoginBtn');
+                const navAll = document.getElementById('nav-all');
                 const navRequests = document.getElementById('nav-requests');
+                const navUsers = document.getElementById('nav-users');
 
                 if (!this.user) {
                     mainWrapper.classList.add('blur-locked');
@@ -616,7 +668,6 @@
                     return;
                 }
 
-                // Sync status with DB
                 const dbUser = this.users.find(u => u.id === this.user.id);
                 if (dbUser) this.user = dbUser;
 
@@ -643,10 +694,17 @@
                     document.getElementById('headerRoleBadge').textContent = roleTitle;
                     document.getElementById('activeServerDisplay').textContent = this.user.server;
 
-                    if (this.user.role === 'moderator' || this.user.role === 'creator') {
-                        navRequests.classList.remove('hidden');
-                    } else {
+                    // STRICT PRIVACY ROLE ENFORCEMENT:
+                    // Hide "All Server Clips" button for Administrators
+                    if (this.user.role === 'admin') {
+                        navAll.classList.add('hidden');
                         navRequests.classList.add('hidden');
+                        navUsers.classList.add('hidden');
+                        this.currentFilter = 'my';
+                    } else {
+                        navAll.classList.remove('hidden');
+                        navRequests.classList.remove('hidden');
+                        navUsers.classList.remove('hidden');
                     }
 
                     this.renderFeed();
@@ -666,11 +724,9 @@
                 const avatar = document.getElementById('regAvatarUrl').value.trim() || 
                     `https://api.dicebear.com/7.x/identicon/svg?seed=${nick}`;
 
-                if (role === 'creator') {
-                    if (masterKey !== MASTER_CREATOR_KEY) {
-                        this.showToast('Неверный Мастер-пароль Создателя!');
-                        return;
-                    }
+                if (role === 'creator' && masterKey !== MASTER_CREATOR_KEY) {
+                    this.showToast('Неверный Мастер-пароль Создателя!');
+                    return;
                 }
 
                 const newUser = {
@@ -688,6 +744,34 @@
                 this.user = newUser;
                 localStorage.setItem('rtv_user', JSON.stringify(this.user));
 
+                this.checkAuthStatus();
+            }
+
+            simulateSelfApprove() {
+                if (this.user) {
+                    this.user.status = 'approved';
+                    const dbUser = this.users.find(u => u.id === this.user.id);
+                    if (dbUser) dbUser.status = 'approved';
+
+                    localStorage.setItem('rtv_users_db', JSON.stringify(this.users));
+                    localStorage.setItem('rtv_user', JSON.stringify(this.user));
+                    this.showToast('Заявка симулирована и одобрена!');
+                    this.checkAuthStatus();
+                }
+            }
+
+            openLogoutConfirm() {
+                document.getElementById('logoutModal').classList.remove('hidden');
+            }
+
+            closeLogoutConfirm() {
+                document.getElementById('logoutModal').classList.add('hidden');
+            }
+
+            logout() {
+                localStorage.removeItem('rtv_user');
+                this.user = null;
+                this.closeLogoutConfirm();
                 this.checkAuthStatus();
             }
 
@@ -710,12 +794,14 @@
                 const SEVENTY_TWO_HOURS = 72 * 3600 * 1000;
                 list = list.filter(v => (now - v.createdAt) < SEVENTY_TWO_HOURS);
 
+                // STRICT ADMIN PRIVACY RULE:
+                // Administrators ALWAYS see ONLY THEIR OWN materials
                 if (this.user.role === 'admin') {
                     list = list.filter(v => v.authorNick === this.user.nick);
                 } else if (this.user.role === 'moderator') {
                     list = list.filter(v => v.server === this.user.server);
                 }
-                // Creator sees all videos on all servers
+                // Creator sees all materials across all servers
 
                 if (this.currentFilter === 'my') {
                     list = list.filter(v => v.authorNick === this.user.nick);
@@ -757,32 +843,37 @@
             renderFeed() {
                 const container = document.getElementById('feedContainer');
                 const requestsContainer = document.getElementById('requestsContainer');
+                const usersContainer = document.getElementById('usersContainer');
                 const emptyState = document.getElementById('emptyState');
 
+                container.classList.add('hidden');
+                requestsContainer.classList.add('hidden');
+                usersContainer.classList.add('hidden');
+                emptyState.classList.add('hidden');
+
                 if (this.currentFilter === 'requests') {
-                    container.classList.add('hidden');
-                    emptyState.classList.add('hidden');
                     requestsContainer.classList.remove('hidden');
                     this.renderRequestsTable();
                     return;
                 }
 
-                requestsContainer.classList.add('hidden');
+                if (this.currentFilter === 'users') {
+                    usersContainer.classList.remove('hidden');
+                    this.renderUsersTable();
+                    return;
+                }
+
                 container.classList.remove('hidden');
 
                 const videos = this.getFilteredVideos();
-                const pendingCount = this.getPendingUsers().length;
-                document.getElementById('count-requests').textContent = pendingCount;
+                document.getElementById('count-requests').textContent = this.getPendingUsers().length;
+                document.getElementById('count-users').textContent = this.getVisibleUsers().length;
 
                 if (videos.length === 0) {
-                    container.innerHTML = '';
                     emptyState.classList.remove('hidden');
                     emptyState.classList.add('flex');
                     return;
                 }
-
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
 
                 container.className = this.viewMode === 'grid' 
                     ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5' 
@@ -795,6 +886,19 @@
             getPendingUsers() {
                 return this.users.filter(u => {
                     if (u.status !== 'pending') return false;
+                    if (this.user.role === 'creator') return true;
+                    if (this.user.role === 'moderator') {
+                        return u.server === this.user.server && u.role === 'admin';
+                    }
+                    return false;
+                });
+            }
+
+            // MODERATOR ISOLATION RULE:
+            // Moderator sees ONLY Admins of their own server. Creator & Other servers are hidden.
+            getVisibleUsers() {
+                return this.users.filter(u => {
+                    if (u.status !== 'approved') return false;
                     if (this.user.role === 'creator') return true;
                     if (this.user.role === 'moderator') {
                         return u.server === this.user.server && u.role === 'admin';
@@ -830,6 +934,64 @@
                         </td>
                     </tr>
                 `).join('');
+            }
+
+            renderUsersTable() {
+                const tbody = document.getElementById('usersTableBody');
+                const visibleUsers = this.getVisibleUsers();
+
+                if (visibleUsers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Пользователи не найдены</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = visibleUsers.map(u => {
+                    const userClipsCount = this.videos.filter(v => v.authorNick === u.nick).length;
+                    const isSelf = u.id === this.user.id;
+
+                    return `
+                        <tr class="hover:bg-brand-panel/50 transition">
+                            <td class="p-3.5 flex items-center gap-2">
+                                <img src="${u.avatar}" class="w-6 h-6 rounded-full border border-brand-border object-cover">
+                                <span class="font-bold text-white">${u.nick} ${isSelf ? '<span class="text-[9px] text-brand-yellow">(Вы)</span>' : ''}</span>
+                            </td>
+                            <td class="p-3.5 font-mono text-brand-yellow">${u.server}</td>
+                            <td class="p-3.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${u.role === 'creator' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : (u.role === 'moderator' ? 'bg-yellow-500/10 text-brand-yellow border border-yellow-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20')}">
+                                    ${u.role === 'creator' ? 'Создатель' : (u.role === 'moderator' ? 'Модератор' : 'Администратор')}
+                                </span>
+                            </td>
+                            <td class="p-3.5 font-mono">Записей: ${userClipsCount}</td>
+                            <td class="p-3.5 text-right">
+                                ${!isSelf ? 
+                                    `<button onclick="app.openDeleteUserConfirm(${u.id}, '${u.nick}')" class="bg-red-900/40 hover:bg-red-600 text-red-300 hover:text-white font-bold px-3 py-1 rounded text-[11px] border border-red-500/30 transition">Снять доступ</button>` : 
+                                    `<span class="text-[10px] text-gray-500 italic">Владелец</span>`
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            openDeleteUserConfirm(userId, nick) {
+                this.pendingDeleteUserId = userId;
+                document.getElementById('deleteUserWarningText').textContent = `Вы уверены, что хотите снять доступ у администратора ${nick}? Он больше не сможет зайти на хостинг.`;
+                document.getElementById('deleteUserModal').classList.remove('hidden');
+            }
+
+            closeDeleteUserConfirm() {
+                this.pendingDeleteUserId = null;
+                document.getElementById('deleteUserModal').classList.add('hidden');
+            }
+
+            executeRemoveUser() {
+                if (this.pendingDeleteUserId) {
+                    this.users = this.users.filter(u => u.id !== this.pendingDeleteUserId);
+                    localStorage.setItem('rtv_users_db', JSON.stringify(this.users));
+                    this.showToast('Доступ с пользователя успешно снят');
+                    this.closeDeleteUserConfirm();
+                    this.renderFeed();
+                }
             }
 
             approveUser(userId) {
@@ -1167,16 +1329,12 @@
                 }, 3000);
             }
 
-            toggleUserMenu() {
-                if (confirm('Вы действительно хотите выйти из профиля?')) {
-                    localStorage.removeItem('rtv_user');
-                    this.user = null;
-                    this.checkAuthStatus();
-                }
-            }
-
             resetView() {
-                this.setFilter('all');
+                if (this.user && this.user.role === 'admin') {
+                    this.setFilter('my');
+                } else {
+                    this.setFilter('all');
+                }
             }
         }
 
